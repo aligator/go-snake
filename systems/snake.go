@@ -1,1 +1,141 @@
 package systems
+
+import (
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/common"
+	"snake/entities"
+)
+
+type direction byte
+
+const (
+	NONE direction = iota
+	LEFT
+	RIGHT
+	UP
+	DOWN
+)
+
+type Snake struct {
+	body          []*entities.SnakePart
+	world         *ecs.World
+	lastDirection direction
+	lastMove      float32
+}
+
+const leftButton = "left"
+const rightButton = "right"
+const upButton = "up"
+const downButton = "down"
+
+func SetupSnake() {
+	engo.Input.RegisterButton(leftButton, engo.KeyArrowLeft)
+	engo.Input.RegisterButton(rightButton, engo.KeyArrowRight)
+	engo.Input.RegisterButton(upButton, engo.KeyArrowUp)
+	engo.Input.RegisterButton(downButton, engo.KeyArrowDown)
+}
+
+func (s *Snake) Update(dt float32) {
+
+	if engo.Input.Button(rightButton).JustPressed() {
+		s.lastDirection = RIGHT
+	}
+
+	if engo.Input.Button(leftButton).JustPressed() {
+		s.lastDirection = LEFT
+	}
+
+	if engo.Input.Button(upButton).JustPressed() {
+		s.lastDirection = UP
+	}
+
+	if engo.Input.Button(downButton).JustPressed() {
+		s.lastDirection = DOWN
+	}
+
+	if s.lastMove < 0.2 {
+		s.lastMove = s.lastMove + dt
+		return
+	}
+	s.lastMove = 0
+
+	newPos := s.body[len(s.body)-1].Position
+
+	switch s.lastDirection {
+	case RIGHT:
+		newPos.X = newPos.X + 16
+	case LEFT:
+		newPos.X = newPos.X - 16
+	case UP:
+		newPos.Y = newPos.Y - 16
+	case DOWN:
+		newPos.Y = newPos.Y + 16
+	default:
+		return
+	}
+
+	// add new head
+	s.addParts([]*entities.SnakePart{entities.NewSnakeFront(newPos)})
+
+	// transform former head to body part
+	entities.TransformToBodyPart(s.body[len(s.body)-2])
+
+	// remove old tail
+	s.world.RemoveEntity(s.body[0].BasicEntity)
+
+	// transform last body part to tail
+	entities.TransformToTailPart(s.body[0])
+}
+
+func (s *Snake) Remove(e ecs.BasicEntity) {
+	for i, part := range s.body {
+		if part.ID() == e.ID() {
+			s.body = append(s.body[:i], s.body[i+1:]...)
+			break
+		}
+	}
+}
+
+// New implements the Initializer interface and
+// will be called on creation automatically.
+// It sets up the starting snake.
+func (s *Snake) New(world *ecs.World) {
+	s.world = world
+
+	center := engo.Point{
+		X: engo.GameWidth() / 2,
+		Y: engo.GameHeight() / 2,
+	}
+
+	// set starting snake
+	parts := []*entities.SnakePart{
+		entities.NewSnakeBack(engo.Point{
+			X: center.X - 16,
+			Y: center.Y,
+		}),
+		entities.NewSnakeBody(engo.Point{
+			X: center.X,
+			Y: center.Y,
+		}),
+		entities.NewSnakeFront(engo.Point{
+			X: center.X + 16,
+			Y: center.Y,
+		}),
+	}
+
+	s.addParts(parts)
+}
+
+func (s *Snake) addParts(parts []*entities.SnakePart) {
+	for _, system := range s.world.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			// we assume there is only one render system
+			for _, part := range parts {
+				s.body = append(s.body, part)
+				sys.Add(&part.BasicEntity, &part.RenderComponent, &part.SpaceComponent)
+			}
+		}
+	}
+}
