@@ -10,8 +10,8 @@ import (
 type direction byte
 
 const (
-	NONE direction = iota
-	LEFT
+	// start with one so that 0 (at the beginning) does nothing
+	LEFT direction = 1 + iota
 	RIGHT
 	UP
 	DOWN
@@ -79,13 +79,13 @@ func (s *Snake) Update(dt float32) {
 	s.addParts([]*entities.SnakePart{entities.NewSnakeFront(newPos)})
 
 	// transform former head to body part
-	entities.TransformToBodyPart(s.body[len(s.body)-2])
+	s.body[len(s.body)-2].TransformToBodyPart()
 
 	// remove old tail
 	s.world.RemoveEntity(s.body[0].BasicEntity)
 
 	// transform last body part to tail
-	entities.TransformToTailPart(s.body[0])
+	s.body[0].TransformToTailPart()
 }
 
 func (s *Snake) Remove(e ecs.BasicEntity) {

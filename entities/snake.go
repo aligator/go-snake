@@ -18,9 +18,10 @@ type SnakePart struct {
 }
 
 func PreloadSnake() {
-	engo.Files.Load(snakeBodyTexture)
-	engo.Files.Load(snakeFrontTexture)
-	engo.Files.Load(snakeBackTexture)
+	err := engo.Files.Load(snakeBodyTexture, snakeFrontTexture, snakeBackTexture)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func loadTexture(path string) *common.Texture {
@@ -47,6 +48,14 @@ func newSnakePart(pos engo.Point, texture *common.Texture) *SnakePart {
 	}
 }
 
+func (s *SnakePart) TransformToBodyPart() {
+	s.Drawable = loadTexture(snakeBodyTexture)
+}
+
+func (s *SnakePart) TransformToTailPart() {
+	s.Drawable = loadTexture(snakeBackTexture)
+}
+
 func NewSnakeFront(pos engo.Point) *SnakePart {
 	return newSnakePart(pos, loadTexture(snakeFrontTexture))
 }
@@ -57,12 +66,4 @@ func NewSnakeBody(pos engo.Point) *SnakePart {
 
 func NewSnakeBack(pos engo.Point) *SnakePart {
 	return newSnakePart(pos, loadTexture(snakeBackTexture))
-}
-
-func TransformToBodyPart(part *SnakePart) {
-	part.Drawable = loadTexture(snakeBodyTexture)
-}
-
-func TransformToTailPart(part *SnakePart) {
-	part.Drawable = loadTexture(snakeBackTexture)
 }
