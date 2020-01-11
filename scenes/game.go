@@ -30,6 +30,7 @@ func (g *Game) Setup(u engo.Updater) {
 
 	world.AddSystem(&common.RenderSystem{})
 	world.AddSystem(&systems.Snake{Props: g.Properties})
+	world.AddSystem(&systems.CookyEater{})
 	world.AddSystem(&systems.CookySpawner{})
 }
 

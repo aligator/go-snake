@@ -39,7 +39,7 @@ func SetupSnake() {
 }
 
 func (s *Snake) Update(dt float32) {
-
+	// update last direction if any button was pressed
 	if engo.Input.Button(rightButton).JustPressed() {
 		s.lastDirection = RIGHT
 	}
@@ -62,8 +62,8 @@ func (s *Snake) Update(dt float32) {
 	}
 	s.lastMove = 0
 
+	// get new head pos
 	newPos := s.body[len(s.body)-1].Position
-
 	switch s.lastDirection {
 	case RIGHT:
 		newPos.X = newPos.X + s.Props.TileSizeFloat32()
@@ -84,10 +84,16 @@ func (s *Snake) Update(dt float32) {
 	s.body[len(s.body)-2].TransformToBodyPart()
 
 	// remove old tail
-	s.world.RemoveEntity(s.body[0].BasicEntity)
+	// if old tail has the cooky, grow snake
+	tail := s.body[0]
+	if !tail.HasCooky {
+		s.world.RemoveEntity(tail.BasicEntity)
 
-	// transform last body part to tail
-	s.body[0].TransformToTailPart()
+		// transform last body part to tail
+		s.body[0].TransformToTailPart()
+	} else {
+		tail.HasCooky = false
+	}
 }
 
 func (s *Snake) Remove(e ecs.BasicEntity) {
@@ -139,6 +145,8 @@ func (s *Snake) addParts(parts []*entities.SnakePart) {
 				s.body = append(s.body, part)
 				sys.Add(&part.BasicEntity, &part.RenderComponent, &part.SpaceComponent)
 			}
+		case *CookyEater:
+			sys.SetCurrentHead(parts[len(parts)-1])
 		}
 	}
 }

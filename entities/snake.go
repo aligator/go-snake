@@ -10,7 +10,10 @@ const snakeBodyTexture = "textures/snake.png"
 const snakeFrontTexture = "textures/snake_front.png"
 const snakeBackTexture = "textures/snake_back.png"
 
-type SnakePart Object
+type SnakePart struct {
+	Object
+	HasCooky bool
+}
 
 func PreloadSnake() {
 	err := engo.Files.Load(snakeBodyTexture, snakeFrontTexture, snakeBackTexture)
@@ -21,15 +24,17 @@ func PreloadSnake() {
 
 func newSnakePart(pos engo.Point, texture *common.Texture) *SnakePart {
 	return &SnakePart{
-		BasicEntity: ecs.NewBasic(),
-		RenderComponent: common.RenderComponent{
-			Scale:    engo.Point{X: 1, Y: 1},
-			Drawable: texture,
-		},
-		SpaceComponent: common.SpaceComponent{
-			Position: pos,
-			Width:    16,
-			Height:   16,
+		Object: Object{
+			BasicEntity: ecs.NewBasic(),
+			RenderComponent: common.RenderComponent{
+				Scale:    engo.Point{X: 1, Y: 1},
+				Drawable: texture,
+			},
+			SpaceComponent: common.SpaceComponent{
+				Position: pos,
+				Width:    16,
+				Height:   16,
+			},
 		},
 	}
 }

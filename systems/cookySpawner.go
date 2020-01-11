@@ -14,11 +14,15 @@ type CookySpawner struct {
 	cooky *entities.Cooky
 }
 
-func (c *CookySpawner) Update(dt float32) {
+func (c *CookySpawner) Update(float32) {
 
 }
 
 func (c *CookySpawner) Remove(e ecs.BasicEntity) {
+	if c.cooky == nil {
+		return
+	}
+
 	if c.cooky.ID() == e.ID() {
 		c.cooky = nil
 	}
@@ -50,6 +54,8 @@ func (c *CookySpawner) setNewCooky() {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
 			sys.Add(&c.cooky.BasicEntity, &c.cooky.RenderComponent, &c.cooky.SpaceComponent)
+		case *CookyEater:
+			sys.SetCurrentCooky(c.cooky)
 		}
 	}
 }
