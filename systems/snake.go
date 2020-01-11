@@ -4,6 +4,7 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"snake"
 	"snake/entities"
 )
 
@@ -18,6 +19,7 @@ const (
 )
 
 type Snake struct {
+	Props         snake.Properties
 	body          []*entities.SnakePart
 	world         *ecs.World
 	lastDirection direction
@@ -64,13 +66,13 @@ func (s *Snake) Update(dt float32) {
 
 	switch s.lastDirection {
 	case RIGHT:
-		newPos.X = newPos.X + 16
+		newPos.X = newPos.X + s.Props.TileSizeFloat32()
 	case LEFT:
-		newPos.X = newPos.X - 16
+		newPos.X = newPos.X - s.Props.TileSizeFloat32()
 	case UP:
-		newPos.Y = newPos.Y - 16
+		newPos.Y = newPos.Y - s.Props.TileSizeFloat32()
 	case DOWN:
-		newPos.Y = newPos.Y + 16
+		newPos.Y = newPos.Y + s.Props.TileSizeFloat32()
 	default:
 		return
 	}
@@ -104,14 +106,14 @@ func (s *Snake) New(world *ecs.World) {
 	s.world = world
 
 	center := engo.Point{
-		X: engo.GameWidth() / 2,
-		Y: engo.GameHeight() / 2,
+		X: float32(s.Props.Width/2) * s.Props.TileSizeFloat32(),
+		Y: float32(s.Props.Height/2) * s.Props.TileSizeFloat32(),
 	}
 
 	// set starting snake
 	parts := []*entities.SnakePart{
 		entities.NewSnakeBack(engo.Point{
-			X: center.X - 16,
+			X: center.X - s.Props.TileSizeFloat32(),
 			Y: center.Y,
 		}),
 		entities.NewSnakeBody(engo.Point{
@@ -119,7 +121,7 @@ func (s *Snake) New(world *ecs.World) {
 			Y: center.Y,
 		}),
 		entities.NewSnakeFront(engo.Point{
-			X: center.X + 16,
+			X: center.X + s.Props.TileSizeFloat32(),
 			Y: center.Y,
 		}),
 	}
@@ -132,6 +134,7 @@ func (s *Snake) addParts(parts []*entities.SnakePart) {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
 			// we assume there is only one render system
+			// Otherwise the append has to be in an extra loop outside of the systems-loop
 			for _, part := range parts {
 				s.body = append(s.body, part)
 				sys.Add(&part.BasicEntity, &part.RenderComponent, &part.SpaceComponent)

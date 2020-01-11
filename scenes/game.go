@@ -5,14 +5,18 @@ import (
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
 	"image/color"
+	"snake"
 	"snake/entities"
 	"snake/systems"
 )
 
-type Game struct{}
+type Game struct {
+	snake.Properties
+}
 
 func (g *Game) Preload() {
 	entities.PreloadSnake()
+	entities.PreloadCooky()
 }
 
 func (g *Game) Setup(u engo.Updater) {
@@ -25,7 +29,8 @@ func (g *Game) Setup(u engo.Updater) {
 	systems.SetupSnake()
 
 	world.AddSystem(&common.RenderSystem{})
-	world.AddSystem(&systems.Snake{})
+	world.AddSystem(&systems.Snake{Props: g.Properties})
+	world.AddSystem(&systems.CookySpawner{})
 }
 
 func (g *Game) Type() string {

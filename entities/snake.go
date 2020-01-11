@@ -4,33 +4,19 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
-	"log"
 )
 
 const snakeBodyTexture = "textures/snake.png"
 const snakeFrontTexture = "textures/snake_front.png"
 const snakeBackTexture = "textures/snake_back.png"
 
-type SnakePart struct {
-	ecs.BasicEntity
-	common.RenderComponent
-	common.SpaceComponent
-}
+type SnakePart Object
 
 func PreloadSnake() {
 	err := engo.Files.Load(snakeBodyTexture, snakeFrontTexture, snakeBackTexture)
 	if err != nil {
 		panic(err)
 	}
-}
-
-func loadTexture(path string) *common.Texture {
-	texture, err := common.LoadedSprite(path)
-	if err != nil {
-		log.Println("Unable to load texture: " + err.Error())
-	}
-
-	return texture
 }
 
 func newSnakePart(pos engo.Point, texture *common.Texture) *SnakePart {
