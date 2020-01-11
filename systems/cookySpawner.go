@@ -15,7 +15,9 @@ type CookySpawner struct {
 }
 
 func (c *CookySpawner) Update(float32) {
-
+	if c.cooky == nil {
+		c.setNewCooky()
+	}
 }
 
 func (c *CookySpawner) Remove(e ecs.BasicEntity) {
