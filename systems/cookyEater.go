@@ -16,8 +16,7 @@ func (c *CookyEater) Update(float32) {
 		return
 	}
 
-	if c.currentCooky.Position.X == c.currentHead.Position.X &&
-		c.currentCooky.Position.Y == c.currentHead.Position.Y {
+	if c.currentCooky.Position == c.currentHead.Position {
 		c.world.RemoveEntity(c.currentCooky.BasicEntity)
 		c.currentHead.HasCooky = true
 	}

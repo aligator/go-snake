@@ -24,6 +24,7 @@ type Snake struct {
 	world         *ecs.World
 	lastDirection direction
 	lastMove      float32
+	lost          bool
 }
 
 const leftButton = "left"
@@ -39,6 +40,10 @@ func SetupSnake() {
 }
 
 func (s *Snake) Update(dt float32) {
+	if s.lost {
+		return
+	}
+
 	// update last direction if any button was pressed
 	if engo.Input.Button(rightButton).JustPressed() {
 		s.lastDirection = RIGHT
@@ -74,6 +79,22 @@ func (s *Snake) Update(dt float32) {
 	case DOWN:
 		newPos.Y = newPos.Y + s.Props.TileSizeFloat32()
 	default:
+		return
+	}
+
+	// check for collision on whole snake
+	for _, part := range s.body {
+		if part.Position == newPos {
+			// todo: send lost message which prints "lost" to the screen by using a HUD-system
+			s.lost = true
+			return
+		}
+	}
+
+	// check if snake comes out of the screen
+	if newPos.X < 0 || newPos.Y < 0 || newPos.X >= engo.GameWidth() || newPos.Y >= engo.GameHeight() {
+		// todo: send lost message which prints "lost" to the screen by using a HUD-system
+		s.lost = true
 		return
 	}
 
