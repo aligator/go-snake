@@ -2,13 +2,16 @@ package systems
 
 import (
 	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 	"snake/entities"
+	"snake/messages"
 )
 
 type CookyEater struct {
 	world        *ecs.World
 	currentCooky *entities.Cooky
 	currentHead  *entities.SnakePart
+	points       int
 }
 
 func (c *CookyEater) Update(float32) {
@@ -17,8 +20,10 @@ func (c *CookyEater) Update(float32) {
 	}
 
 	if c.currentCooky.Position == c.currentHead.Position {
+		c.points++
 		c.world.RemoveEntity(c.currentCooky.BasicEntity)
 		c.currentHead.HasCooky = true
+		engo.Mailbox.Dispatch(messages.NewUpdatePoints(c.points))
 	}
 }
 

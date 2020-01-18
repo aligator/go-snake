@@ -17,6 +17,7 @@ type Game struct {
 func (g *Game) Preload() {
 	entities.PreloadSnake()
 	entities.PreloadCooky()
+	entities.PreloadText()
 }
 
 func (g *Game) Setup(u engo.Updater) {
@@ -32,6 +33,7 @@ func (g *Game) Setup(u engo.Updater) {
 	world.AddSystem(&systems.Snake{Props: g.Properties})
 	world.AddSystem(&systems.CookyEater{})
 	world.AddSystem(&systems.CookySpawner{})
+	world.AddSystem(&systems.Hud{})
 }
 
 func (g *Game) Type() string {
